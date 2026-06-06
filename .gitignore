@@ -21,6 +21,7 @@ outputs/PSI_*/propensity_scores.csv
 outputs/PSI_*/positivity_curves.parquet
 outputs/PSI_*/donor_diagnostics.csv
 outputs/PSI_*/logs/
+outputs/PSI_*/pipeline_latest.log
 
 # Stale root-level test outputs
 outputs/*.parquet
