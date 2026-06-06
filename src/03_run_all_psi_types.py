@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-PYTHON      = str(Path("PSI/bin/python").resolve())
+PYTHON      = sys.executable
 PSI_META    = "data/raw/psi_inpatient_cases.csv"
 OUTPUT_ROOT = "outputs"
 SUMMARY_MD  = Path("results/tables") / "all_psi_types_summary.md"
