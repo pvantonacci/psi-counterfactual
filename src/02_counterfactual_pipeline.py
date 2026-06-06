@@ -105,7 +105,7 @@ def _run_pipeline():
         # ── Snowflake — credentials loaded from .env (never hardcode) ────────────
         "snowflake": {
             "account":       os.environ.get("SF_ACCOUNT",   "APHHHWO-PROTEGE_PARTNER"),
-            "user":          os.environ.get("SF_USER",      "PAULO.ANTONACCI@WITHPROTEGE.AI"),
+            "user":          os.environ["SF_USER"],
             "authenticator": "externalbrowser",
             "role":          os.environ.get("SF_ROLE",      "READ_ONLY"),
             "warehouse":     os.environ.get("SF_WAREHOUSE", "READ_ONLY_2XL_WH"),

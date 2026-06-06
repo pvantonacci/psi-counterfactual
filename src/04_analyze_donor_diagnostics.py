@@ -32,7 +32,7 @@ DIAG_CACHE   = CACHE_DIR / "DONOR_MATCHED_DIAGNOSES.parquet"
 REPORT_PATH  = Path("results/reports/donor_diagnostics_by_psi.md")
 
 SF_ACCOUNT    = os.environ.get("SF_ACCOUNT",   "APHHHWO-PROTEGE_PARTNER")
-SF_USER       = os.environ.get("SF_USER",      "PAULO.ANTONACCI@WITHPROTEGE.AI")
+SF_USER       = os.environ["SF_USER"]
 SF_ROLE       = os.environ.get("SF_ROLE",      "READ_ONLY")
 SF_WAREHOUSE  = os.environ.get("SF_WAREHOUSE", "READ_ONLY_2XL_WH")
 SF_DIAG_TABLE = "OMNY_REPL_ID.CUSTOM.DIAGNOSES"
