@@ -11,6 +11,9 @@ __pycache__/
 # Credentials
 .env
 
+# Patient data — never push to remote
+data/raw/
+
 # Large generated binaries (regenerable by re-running the pipeline)
 data/interim/
 outputs/PSI_*/matched_sets.parquet
