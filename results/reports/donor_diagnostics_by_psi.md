@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — by PSI Type
 
-**Generated:** 2026-06-05 20:50
+**Generated:** 2026-06-06 13:51
 **Source:** `OMNY_REPL_ID.CUSTOM.DIAGNOSES` (Snowflake) for all K:1 matched donor encounters
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
 

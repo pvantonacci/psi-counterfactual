@@ -1,22 +1,24 @@
 """
-PSI/psi_pipeline.py
-===================
+01_psi_pipeline.py
+==================
 Runs the PSI adverse-event detection pipeline locally.
 
 Stages A+B run as SQL against Snowflake (same as the Snowpark notebook).
 Stage C calls the Anthropic API (Claude) instead of Snowflake Cortex.
 
-Run from repo root:
-    python3 PSI/psi_pipeline.py
+Run from project root:
+    source PSI/bin/activate
+    python src/01_psi_pipeline.py
 
 Requires:
-    pip install snowflake-connector-python anthropic pandas
-    ANTHROPIC_API_KEY env var set (or in ~/.zprofile: source ~/.zprofile first)
+    pip install snowflake-connector-python anthropic pandas python-dotenv
+    SF_USER and ANTHROPIC_API_KEY in .env (or exported in the shell)
 """
 
 import json
 import os
 import time
+import webbrowser
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -24,16 +26,22 @@ import anthropic
 import pandas as pd
 import snowflake.connector
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # ---------------------------------------------------------------------------
 # Snowflake connection
 # ---------------------------------------------------------------------------
 
 SNOWFLAKE_CONFIG = {
-    "account": "APHHHWO-PROTEGE_PARTNER",
-    "user": "ALLISON.FOX@WITHPROTEGE.AI",
+    "account":       os.environ.get("SF_ACCOUNT",   "APHHHWO-PROTEGE_PARTNER"),
+    "user":          os.environ["SF_USER"],
     "authenticator": "externalbrowser",
-    "role": "READ_ONLY",
-    "warehouse": "READ_ONLY_2XL_WH",
+    "role":          os.environ.get("SF_ROLE",      "READ_ONLY"),
+    "warehouse":     os.environ.get("SF_WAREHOUSE", "READ_ONLY_2XL_WH"),
 }
 
 # ---------------------------------------------------------------------------
@@ -46,7 +54,7 @@ CONFIG = {
     "PROC":  "OMNY_PROTEGE.PUBLIC.OMNY_PROCEDURES",
     "ENC":   "OMNY_REPL_ID.CUSTOM.ENCOUNTERS",
 
-    "CSV_PATH": "PSI/outputs/inpatient/psi_balanced_cases.csv",
+    "CSV_PATH": "data/raw/psi_inpatient_cases.csv",
 
     "CLAUDE_MODEL":    "claude-sonnet-4-6",
     "MAX_NOTE_CHARS":  12000,
@@ -955,6 +963,14 @@ def _classify_row(client: anthropic.Anthropic, row: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 def connect() -> snowflake.connector.SnowflakeConnection:
+    for _wb in [
+        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        "/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    ]:
+        if os.path.exists(_wb):
+            webbrowser.register("wsl-windows-browser", None,
+                                webbrowser.BackgroundBrowser(_wb), preferred=True)
+            break
     print("Opening browser for SSO authentication ...")
     conn = snowflake.connector.connect(**SNOWFLAKE_CONFIG)
     print("Connected.\n")

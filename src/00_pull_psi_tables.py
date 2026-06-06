@@ -1,9 +1,8 @@
 """
-psi/pull_psi_tables.py
+00_pull_psi_tables.py
 
 Pull all OMNY_REPL_ID.CUSTOM tables filtered to the encounters in
-psi/outputs/psi_balanced_cases_v1.csv, one CSV per table, into
-psi/outputs/tables/.
+data/raw/psi_inpatient_cases.csv, one CSV per table, into data/raw/psi_tables/.
 
 Filter strategy (auto-detected per table from INFORMATION_SCHEMA):
   - Table has OMNY_ID + ENCOUNTER_ID  → filter by encounter pair
@@ -14,25 +13,34 @@ Filter strategy (auto-detected per table from INFORMATION_SCHEMA):
 Also pulls OMNY_PROTEGE.PUBLIC.OMNY_NOTES_CONCATENATED filtered to the
 same encounter pairs.
 
-Run: python3 psi/pull_psi_tables.py
+Run from project root:
+    source PSI/bin/activate
+    python src/00_pull_psi_tables.py
 """
 
+import os
 import time
+import webbrowser
 from pathlib import Path
 
 import pandas as pd
 import snowflake.connector
 
-PSI_DIR    = Path(__file__).parent
-CASES_CSV  = PSI_DIR / "outputs" / "aggregated" / "psi_inpatient_cases_downsampled.csv"
-OUTPUT_DIR = PSI_DIR / "outputs" / "aggregated" / "tables"
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+CASES_CSV  = Path("data/raw/psi_inpatient_cases.csv")
+OUTPUT_DIR = Path("data/raw/psi_tables")
 
 SNOWFLAKE_CONFIG = {
-    "account":       "APHHHWO-PROTEGE_PARTNER",
-    "user":          "ALLISON.FOX@WITHPROTEGE.AI",
+    "account":       os.environ.get("SF_ACCOUNT",   "APHHHWO-PROTEGE_PARTNER"),
+    "user":          os.environ["SF_USER"],
     "authenticator": "externalbrowser",
-    "role":          "READ_ONLY",
-    "warehouse":     "READ_ONLY_2XL_WH",
+    "role":          os.environ.get("SF_ROLE",      "READ_ONLY"),
+    "warehouse":     os.environ.get("SF_WAREHOUSE", "READ_ONLY_2XL_WH"),
 }
 
 CUSTOM_DB     = "OMNY_REPL_ID"
@@ -47,6 +55,14 @@ MAX_RETRIES = 5
 
 
 def connect() -> snowflake.connector.SnowflakeConnection:
+    for _wb in [
+        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        "/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    ]:
+        if os.path.exists(_wb):
+            webbrowser.register("wsl-windows-browser", None,
+                                webbrowser.BackgroundBrowser(_wb), preferred=True)
+            break
     print("Opening browser for SSO authentication...")
     conn = snowflake.connector.connect(**SNOWFLAKE_CONFIG)
     print("Connected.\n")

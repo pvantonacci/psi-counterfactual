@@ -1,7 +1,7 @@
 """
-psi/add_classification_columns.py
+01b_add_classification_columns.py
 
-Adds LOS_BUCKET, COMPLEXITY_TIER, and LOS_SOURCE to psi/outputs/psi_balanced_cases_v1.csv.
+Adds LOS_BUCKET, COMPLEXITY_TIER, and LOS_SOURCE to data/raw/psi_inpatient_cases.csv.
 
 Uses the same formulas as omny/feasibility/eval/meta_complexity_comparison.py
 and the same classification logic as omny/feasibility/eval/select_eval_cases.py.
@@ -39,23 +39,32 @@ ICU is detected from three sources (OR logic, same as meta_complexity_comparison
   2. CLAIMS_PROCEDURE.REVENUE_CODE — UB-04 codes 0200-0219
   3. PROCEDURES.PX_CODE — CPT 99291/99292 critical care billing
 
-Run from repo root:
-    python3 psi/add_classification_columns.py
+Run from project root:
+    source PSI/bin/activate
+    python src/01b_add_classification_columns.py
 """
 
+import os
+import webbrowser
 from pathlib import Path
 
 import pandas as pd
 import snowflake.connector
 
-PSI_CSV = Path("psi/outputs/aggregated/psi_inpatient_cases.csv")
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+PSI_CSV = Path("data/raw/psi_inpatient_cases.csv")
 
 SNOWFLAKE_CONFIG = {
-    "account": "APHHHWO-PROTEGE_PARTNER",
-    "user": "ALLISON.FOX@WITHPROTEGE.AI",
+    "account":       os.environ.get("SF_ACCOUNT",   "APHHHWO-PROTEGE_PARTNER"),
+    "user":          os.environ["SF_USER"],
     "authenticator": "externalbrowser",
-    "role": "READ_ONLY",
-    "warehouse": "READ_ONLY_2XL_WH",
+    "role":          os.environ.get("SF_ROLE",      "READ_ONLY"),
+    "warehouse":     os.environ.get("SF_WAREHOUSE", "READ_ONLY_2XL_WH"),
 }
 
 
@@ -339,6 +348,14 @@ def main() -> None:
     encounter_ids = df["ENCOUNTER_ID"].dropna().unique().tolist()
     print(f"PSI file: {len(df)} rows, {len(encounter_ids)} unique encounters\n")
 
+    for _wb in [
+        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        "/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    ]:
+        if os.path.exists(_wb):
+            webbrowser.register("wsl-windows-browser", None,
+                                webbrowser.BackgroundBrowser(_wb), preferred=True)
+            break
     print("Opening browser for SSO authentication...")
     conn = snowflake.connector.connect(**SNOWFLAKE_CONFIG)
     print("Connected.\n")
