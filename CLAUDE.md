@@ -30,6 +30,16 @@ make qa                                                 # QA vs spec PDF
 | `results/` | Human-readable reports and tables |
 | `references/` | Spec PDF and literature |
 
+## Version log (mandatory after every full run)
+After every execution of `make run-all` or `python src/03_run_all_psi_types.py`, create a new
+version log in `src/version/` named `v<N>_<YYYY-MM-DD>.md`. Copy the template from the bottom
+of `src/version/v1_2026-06-06.md`. At minimum record:
+- Run summary (date, operator, PSI types passed/failed, total matched pairs)
+- Any script edits or config changes since the previous version
+- Any issues encountered and fixes applied
+- Governance check results (forbidden suppliers, feature window, gates G-1 through G3)
+- Results table (paste from `results/tables/all_psi_types_summary.md`)
+
 ## Snowflake connection
 Credentials live in `.env` (gitignored). The pipeline uses `externalbrowser` (Okta SSO).
 In WSL2, Chrome at `/mnt/c/Program Files/Google/Chrome/Application/chrome.exe` handles the flow.

@@ -1,6 +1,6 @@
-# Counterfactual Donor Diagnostics — PSI_06_IATROGENIC_PNEUMOTHORAX
+# Counterfactual Donor Diagnostics — PSI_19_OB_TRAUMA_NO_INSTRUMENT
 
-**Run:** 20260606_191223
+**Run:** 20260606_192759
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 223 |
+| Matched donor encounters | 200 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 223 |
+| Donors without diagnosis data | 200 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

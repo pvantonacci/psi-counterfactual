@@ -1,5 +1,5 @@
 {
-  "run_timestamp": "2026-06-05T23:27:52.766843+00:00",
+  "run_timestamp": "2026-06-06T19:15:27.096460+00:00",
   "data_mode": "csv",
   "n_cases": 3,
   "n_donors": 316338,
@@ -7,7 +7,7 @@
   "n_zero_matched_cases": 0,
   "n_full_matched_cases": 1,
   "lsps_fit_ok": true,
-  "caliper": 0.040402779559800095,
+  "caliper": 0.1584146444858929,
   "gates": {
     "G_minus1": "PASS",
     "G0": "PASS",
