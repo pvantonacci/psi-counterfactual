@@ -1,0 +1,31 @@
+# Python environment — never commit the venv
+PSI/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Credentials
+.env
+
+# Large generated binaries (regenerable by re-running the pipeline)
+data/interim/
+outputs/PSI_*/matched_sets.parquet
+outputs/PSI_*/propensity_scores.csv
+outputs/PSI_*/positivity_curves.parquet
+outputs/PSI_*/donor_diagnostics.csv
+outputs/PSI_*/logs/
+
+# Stale root-level test outputs
+outputs/*.parquet
+outputs/*.csv
+outputs/*.json
+outputs/*.log
+outputs/runs/
+
+# OS
+.DS_Store
+Thumbs.db
