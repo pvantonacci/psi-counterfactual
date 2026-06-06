@@ -1,0 +1,63 @@
+{
+  "run_timestamp": "2026-06-05T23:55:12.558036+00:00",
+  "data_mode": "csv",
+  "n_cases": 11,
+  "n_donors": 316338,
+  "n_matched_pairs": 416,
+  "n_zero_matched_cases": 1,
+  "n_full_matched_cases": 8,
+  "lsps_fit_ok": true,
+  "caliper": 0.253192895656078,
+  "gates": {
+    "G_minus1": "PASS",
+    "G0": "PASS",
+    "G1": "PASS",
+    "G2": "PASS",
+    "G3": "PASS"
+  },
+  "placebo_verification": {
+    "raw_arm_ate": 0.0,
+    "raw_arm_ci": [
+      -1.0,
+      1.0
+    ],
+    "raw_arm_ci_brackets_zero": true,
+    "matched_arm_ate": 0.0,
+    "matched_arm_ci": [
+      -1.0,
+      1.0
+    ],
+    "matched_arm_ci_brackets_zero": true
+  },
+  "smd_summary": [
+    {
+      "feature": "AGE",
+      "smd_before": 2.0242533886687517,
+      "smd_after": 0.45972856314743504
+    },
+    {
+      "feature": "EN_LOS_num",
+      "smd_before": 0.05926814095692151,
+      "smd_after": 0.33802736506307474
+    },
+    {
+      "feature": "n_chronic",
+      "smd_before": 0.05559668137380157,
+      "smd_after": 0.0
+    }
+  ],
+  "blanking_sweep": [
+    {
+      "B_GRID": 3,
+      "total_potential_pairs": 550
+    },
+    {
+      "B_GRID": 6,
+      "total_potential_pairs": 550
+    },
+    {
+      "B_GRID": 9,
+      "total_potential_pairs": 550
+    }
+  ]
+}

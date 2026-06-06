@@ -1,0 +1,10 @@
+{
+  "note": "E-value stub \u2014 replace with formal sensitivity analysis in production",
+  "data_mode": "csv",
+  "run_timestamp": "2026-06-05T23:59:12.818757+00:00",
+  "e_value": 1.0,
+  "rr_proxy": 1.0,
+  "ate_raw": 0.0,
+  "Y_sd": 1.0,
+  "interpretation": "An unmeasured confounder would need RR >= 1.00 with both exposure and outcome to explain away the observed raw-arm effect."
+}
