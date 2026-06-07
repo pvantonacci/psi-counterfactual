@@ -50,6 +50,51 @@ Why 106 and not 110? The run-all summary reports 110 total cases across the 16 P
 
 ---
 
+## Pipeline Funnel: Observations at Each Stage
+
+### Aggregate funnel (all 16 PSI types combined)
+
+| Stage | Description | N |
+|---|---|---|
+| **Stage A+B — SQL screening** | ICD-10 regex candidates sampled from Snowflake `ENCOUNTERS` (1% Bernoulli, ~51M rows); up to 200 per PSI type × 16 types | ≤ 3,200 candidates |
+| **Stage C — Claude chart review** | Candidates confirmed by `claude-sonnet-4-6`; retained in `data/raw/psi_inpatient_cases.csv` | **255** (177 PSI+, 78 PSI−) |
+| **Stage −1 input** | Encounters with clinical data pulled via `src/00_pull_psi_tables.py` (`data/raw/psi_tables/encounters.csv`) | **145** |
+| **Stage −1 governance filter** | Forbidden suppliers (1990, 3707, 3490) removed | 35 removed → **110** remain |
+| **Stage 0 — donor pool** | All inpatient encounters from Snowflake excluding cases (1% Bernoulli sample, forbidden suppliers excluded) | **316,338** |
+| **Stage 0 — risk set at t\*** | Donors still admitted at `t_star = 1` (first 4-hour grid tick) | **188,890** |
+| **Stage 1 — CEM** | Donors surviving coarsened exact matching to a case stratum (sum across 16 types; strata overlap across types) | **66,863** donor-slots |
+| **Stage 2c — matched pairs** | Nearest-neighbour pairs written to `all_matched_pairs.csv` (up to k=50 per case) | **3,615** pairs; 4 cases found zero donors |
+| **Final analysis set** | Cases with ≥1 matched donor; rank-1 pairs used for timestamp analysis | **106** cases / **91** unique rank-1 donors |
+
+### Per-PSI type funnel (Stage −1 → Stage 1 CEM → Stage 2c)
+
+| PSI Type | Cases (Stage −1) | CEM Donors (Stage 1) | Matched Pairs (Stage 2c) |
+|---|--:|--:|--:|
+| PSI_03_PRESSURE_ULCER | 3 | 30,090 | 150 |
+| PSI_04_FAILURE_TO_RESCUE | 5 | 788 | 76 |
+| PSI_05_RETAINED_ITEM | 13 | 2,425 | 507 |
+| PSI_06_IATROGENIC_PNEUMOTHORAX | 7 | 1,138 | 223 |
+| PSI_07_CLABSI | 6 | 2,853 | 147 |
+| PSI_08_FALL_FRACTURE | 3 | 1,797 | 73 |
+| PSI_09_POSTOP_HEMORRHAGE | 11 | 4,327 | 428 |
+| PSI_10_POSTOP_AKI_DIALYSIS | 3 | 1,742 | 74 |
+| PSI_11_POSTOP_RESP_FAILURE | 8 | 3,340 | 265 |
+| PSI_12_PERIOP_PE_DVT | 3 | 93 | 11 |
+| PSI_13_POSTOP_SEPSIS | 5 | 1,548 | 78 |
+| PSI_14_WOUND_DEHISCENCE | 7 | 1,571 | 150 |
+| PSI_15_ACCIDENTAL_PUNCTURE | 14 | 9,517 | 700 |
+| PSI_17_BIRTH_TRAUMA | 7 | 1,011 | 117 |
+| PSI_18_OB_TRAUMA_INSTRUMENT | 11 | 2,485 | 416 |
+| PSI_19_OB_TRAUMA_NO_INSTRUMENT | 4 | 2,138 | 200 |
+| **Total** | **110** | **66,863** | **3,615** |
+
+**Notes:**
+- CEM donor counts are per-type; the same Snowflake encounter can appear in multiple types' matched strata (i.e. the 66,863 sum double-counts donors shared across PSI types). The unique donor pool size across all matched pairs is **2,787** unique donor encounter IDs.
+- 4 cases (PSI_06: 1, PSI_17: 2, PSI_18: 1) found zero donors after Stage 2c and are absent from `all_matched_pairs.csv`, reducing 110 → 106.
+- PSI_12_PERIOP_PE_DVT had only 93 CEM-matched donors (the smallest stratum), resulting in only 11 matched pairs across 3 cases.
+
+---
+
 ## Summary Dashboard
 
 ![](../figures/ts_summary_dashboard.png)
