@@ -128,6 +128,77 @@ def collect_summary(name: str, df: pd.DataFrame) -> None:
         })
 
 
+def classify_preexisting_dx(
+    dx_df: pd.DataFrame,
+    t0_map: dict,
+    omny_map: dict,
+    pl_df: pd.DataFrame,
+) -> pd.Series:
+    """
+    Boolean Series (True = pre-existing) aligned with dx_df.
+
+    Priority rules:
+      1. DX_CHRONIC == 'YES'
+      2. DX_DATE < t0 − 1 day  (temporal pre-admission)
+      3. DX_STATUS contains 'POA' or 'BEFORE'
+      4. ICD code found on patient's problem list (PL_CHRONIC or noted ≥ 30 d before t0)
+    """
+    flags = pd.Series(False, index=dx_df.index)
+
+    # Rule 1
+    if "DX_CHRONIC" in dx_df.columns:
+        flags |= dx_df["DX_CHRONIC"].fillna("").astype(str).str.upper() == "YES"
+
+    # Rule 2
+    if "DX_DATE" in dx_df.columns:
+        dx_dates  = pd.to_datetime(dx_df["DX_DATE"], errors="coerce")
+        enc_t0    = dx_df["ENCOUNTER_ID"].map(t0_map)
+        cutoff    = enc_t0 - pd.Timedelta(days=1)
+        flags    |= dx_dates.notna() & enc_t0.notna() & (dx_dates < cutoff)
+
+    # Rule 3
+    if "DX_STATUS" in dx_df.columns:
+        flags |= dx_df["DX_STATUS"].fillna("").astype(str).str.upper().str.contains(
+            "POA|BEFORE", regex=True, na=False)
+
+    # Rule 4 — problem list cross-reference (vectorised merge)
+    if len(pl_df) > 0 and "PL_CODE" in pl_df.columns and omny_map:
+        remaining = dx_df[~flags].copy()
+        if len(remaining) > 0 and "DX_CODE" in remaining.columns:
+            remaining["_OMNY_ID"] = remaining["ENCOUNTER_ID"].map(omny_map)
+            remaining["_T0"]      = remaining["ENCOUNTER_ID"].map(t0_map)
+            remaining["_DX_CODE_U"] = remaining["DX_CODE"].fillna("").astype(str).str.upper()
+
+            pl_work = pl_df.copy()
+            pl_work["_PL_CODE_U"] = pl_work["PL_CODE"].fillna("").astype(str).str.upper()
+            pl_work["PL_NOTED_DATE"] = pd.to_datetime(
+                pl_work.get("PL_NOTED_DATE", pd.Series(dtype="object")), errors="coerce"
+            )
+            # Mark each PL entry as pre-existing (chronic or noted early)
+            pl_work["_pl_preexisting"] = (
+                pl_work["PL_CHRONIC"].fillna("").astype(str).str.upper() == "YES"
+            )
+            # We'll check the noted-date condition against each encounter's t0 at merge time
+
+            merged = remaining[["_OMNY_ID","_T0","_DX_CODE_U"]].merge(
+                pl_work[["OMNY_ID","_PL_CODE_U","PL_NOTED_DATE","_pl_preexisting"]],
+                left_on=["_OMNY_ID","_DX_CODE_U"],
+                right_on=["OMNY_ID","_PL_CODE_U"],
+                how="inner",
+            )
+            if len(merged) > 0:
+                # Keep rows where PL entry is chronic OR noted ≥ 30d before t0
+                cutoff_pl = merged["_T0"] - pd.Timedelta(days=30)
+                matched_mask = merged["_pl_preexisting"] | (
+                    merged["PL_NOTED_DATE"].notna() & (merged["PL_NOTED_DATE"] < cutoff_pl)
+                )
+                matched_idx = set(merged[matched_mask].index.intersection(remaining.index))
+                if matched_idx:
+                    flags.loc[list(matched_idx)] = True
+
+    return flags
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Load matched pairs + encounters
 # ─────────────────────────────────────────────────────────────────────────────
@@ -157,11 +228,26 @@ print(f"  {len(pairs_r1)} rank-1 pairs  |  {len(case_encs)} cases  |  "
       f"{pairs['psi_type'].nunique()} PSI types")
 
 print("Loading encounters …")
-enc = pd.read_csv(RAW / "encounters.csv",
-                  usecols=["ENCOUNTER_ID", "EN_START_DATE", "EN_START_TIME", "EN_LOS"])
+_enc_usecols = ["ENCOUNTER_ID", "EN_START_DATE", "EN_START_TIME", "EN_LOS"]
+try:
+    enc = pd.read_csv(RAW / "encounters.csv",
+                      usecols=_enc_usecols + ["OMNY_ID"])
+except ValueError:
+    enc = pd.read_csv(RAW / "encounters.csv", usecols=_enc_usecols)
 enc = enc[enc["ENCOUNTER_ID"].isin(all_encs)].copy()
 enc["t0"] = parse_dt(enc["EN_START_DATE"], enc["EN_START_TIME"])
 t0_map    = enc.set_index("ENCOUNTER_ID")["t0"].to_dict()
+omny_map  = enc.set_index("ENCOUNTER_ID")["OMNY_ID"].to_dict() \
+            if "OMNY_ID" in enc.columns else {}
+
+print("Loading problem lists …")
+try:
+    pl = pd.read_csv(RAW / "problem_lists.csv",
+                     usecols=["OMNY_ID", "PL_CODE", "PL_CHRONIC", "PL_NOTED_DATE"])
+    print(f"  {len(pl):,} problem-list rows loaded")
+except (FileNotFoundError, ValueError):
+    pl = pd.DataFrame()
+    print("  problem_lists.csv not found — skipping PL cross-reference")
 
 # Detect whether any donor clinical data exists in raw tables.
 any_donors_in_raw = len((donor_encs_r1 | donor_encs_all) & set(enc["ENCOUNTER_ID"]))
@@ -182,9 +268,13 @@ else:
 # ─────────────────────────────────────────────────────────────────────────────
 
 print("\n[1/7] Diagnoses …")
-dx = pd.read_csv(RAW / "diagnoses.csv",
-                 usecols=["ENCOUNTER_ID", "DX_DATE", "DX_TIME",
-                          "DX_CODE", "DX_HCS_DESC"])
+_dx_base_cols = ["ENCOUNTER_ID", "DX_DATE", "DX_TIME", "DX_CODE", "DX_HCS_DESC"]
+_dx_extra     = ["DX_CHRONIC", "DX_STATUS"]
+try:
+    dx = pd.read_csv(RAW / "diagnoses.csv",
+                     usecols=_dx_base_cols + _dx_extra)
+except ValueError:
+    dx = pd.read_csv(RAW / "diagnoses.csv", usecols=_dx_base_cols)
 dx = dx[dx["ENCOUNTER_ID"].isin(all_encs)].copy()
 dx["event_ts"]  = parse_dt(dx["DX_DATE"], dx["DX_TIME"])
 dx["elapsed_h"] = elapsed_hours(dx["event_ts"], t0_map, dx["ENCOUNTER_ID"])
@@ -197,6 +287,35 @@ plt.tight_layout()
 save_fig(fig, "ts_diagnoses.png", "Diagnoses",
          "Distribution of diagnosis timestamps relative to admission (t₀). "
          "Negative values indicate diagnoses recorded before the encounter start time.")
+
+# ── 1b. Diagnosis classification — pre-existing vs encounter-driven ───────────
+print("  [1b] Classifying diagnoses …")
+dx["is_preexisting"] = classify_preexisting_dx(dx, t0_map, omny_map, pl)
+dx_preexisting = dx[dx["is_preexisting"]].copy()
+dx_encounter   = dx[~dx["is_preexisting"]].copy()
+n_pre  = dx["is_preexisting"].sum()
+n_enc  = (~dx["is_preexisting"]).sum()
+print(f"       Pre-existing: {n_pre:,}  |  Encounter-driven: {n_enc:,}")
+
+collect_summary("Diagnoses (pre-existing)",     dx_preexisting)
+collect_summary("Diagnoses (encounter-driven)", dx_encounter)
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 4))
+plot_domain(dx_preexisting[["elapsed_h", "role"]],
+            f"Pre-existing Diagnoses (n={n_pre:,})",
+            xlim=(-24, 480), ax=axes[0])
+plot_domain(dx_encounter[["elapsed_h", "role"]],
+            f"Encounter-driven Diagnoses (n={n_enc:,})",
+            xlim=(-24, 480), ax=axes[1])
+plt.tight_layout()
+save_fig(
+    fig, "ts_dx_classification.png", "Diagnoses by Origin",
+    "Left: diagnoses classified as pre-existing (DX_CHRONIC='YES', DX_DATE before "
+    "admission, problem-list cross-reference, or POA flag). "
+    "Right: diagnoses first recorded during or after admission. "
+    "Only pre-existing diagnoses are used in comorbidity-based CEM strata and "
+    "Charlson/Elixhauser score computation."
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

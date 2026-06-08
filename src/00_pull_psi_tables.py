@@ -187,11 +187,26 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     cases   = pd.read_csv(CASES_CSV)
-    enc_ids = cases["ENCOUNTER_ID"].dropna().unique().tolist()
+    enc_ids = set(cases["ENCOUNTER_ID"].dropna().unique())
 
+    # Include donor (counterfactual) encounters from the matched pairs so that
+    # their clinical records are pulled alongside the PSI cases.
+    matched_pairs_csv = Path("results/tables/all_matched_pairs.csv")
+    if matched_pairs_csv.exists():
+        pairs      = pd.read_csv(matched_pairs_csv)
+        donor_ids  = set(pairs["donor_enc"].dropna().unique())
+        n_new      = len(donor_ids - enc_ids)
+        enc_ids   |= donor_ids
+        print(f"PSI cases   : {len(cases)} rows")
+        print(f"Donor encs  : {len(donor_ids)} unique  ({n_new} not already in cases)")
+    else:
+        print(f"PSI cases   : {len(cases)} rows")
+        print("No matched_pairs file found — pulling cases only.")
+
+    enc_ids    = list(enc_ids)
     enc_id_sql = ", ".join(f"'{v}'" for v in enc_ids)
 
-    print(f"PSI cases: {len(cases)} rows, {len(enc_ids)} unique encounters\n")
+    print(f"Total unique encounters to pull: {len(enc_ids)}\n")
 
     conn = connect()
     try:

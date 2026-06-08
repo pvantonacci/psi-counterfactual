@@ -131,6 +131,35 @@ lines += [
 ]
 
 SUMMARY_MD.write_text("\n".join(lines))
+
+# ── Rebuild all_matched_pairs.csv from per-type parquet outputs ───────────────
+pairs_frames = []
+for r in results:
+    ms_path = Path(OUTPUT_ROOT) / r["psi_type"] / "matched_sets.parquet"
+    if ms_path.exists():
+        try:
+            df = pd.read_parquet(ms_path)
+            df["psi_type"] = r["psi_type"]
+            pairs_frames.append(df)
+        except Exception as e:
+            print(f"  WARNING: could not read {ms_path}: {e}")
+
+PAIRS_CSV = Path("results/tables/all_matched_pairs.csv")
+if pairs_frames:
+    all_pairs = pd.concat(pairs_frames, ignore_index=True)
+    PAIRS_CSV.write_text("")   # truncate first
+    all_pairs.to_csv(PAIRS_CSV, index=False)
+    n_unique_cases  = all_pairs["case_enc"].nunique()
+    n_unique_donors = all_pairs["donor_enc"].nunique()
+    n_r1            = (all_pairs["match_rank"] == 1).sum()
+    print(f"Matched pairs CSV written: {PAIRS_CSV}")
+    print(f"  Total rows    : {len(all_pairs):,}")
+    print(f"  Unique cases  : {n_unique_cases}")
+    print(f"  Rank-1 pairs  : {n_r1}")
+    print(f"  Unique donors : {n_unique_donors:,}")
+else:
+    print("WARNING: no matched_sets.parquet files found — all_matched_pairs.csv not updated")
+
 print(f"\n{'='*70}")
 print(f"All done. {n_pass}/{n_total} passed. {total_pairs} total matched pairs.")
 print(f"Summary written to: {SUMMARY_MD}")
