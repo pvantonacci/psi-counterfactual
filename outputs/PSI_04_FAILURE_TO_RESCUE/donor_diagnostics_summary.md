@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_04_FAILURE_TO_RESCUE
 
-**Run:** 20260606_191024
+**Run:** 20260607_223246
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 76 |
+| Matched donor encounters | 67 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 76 |
+| Donors without diagnosis data | 67 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

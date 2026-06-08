@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_13_POSTOP_SEPSIS
 
-**Run:** 20260606_192023
+**Run:** 20260607_224516
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 78 |
+| Matched donor encounters | 104 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 78 |
+| Donors without diagnosis data | 104 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

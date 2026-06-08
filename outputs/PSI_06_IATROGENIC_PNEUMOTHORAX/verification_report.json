@@ -1,13 +1,13 @@
 {
-  "run_timestamp": "2026-06-06T19:13:15.723200+00:00",
+  "run_timestamp": "2026-06-07T22:36:46.900422+00:00",
   "data_mode": "csv",
   "n_cases": 7,
-  "n_donors": 316338,
-  "n_matched_pairs": 223,
-  "n_zero_matched_cases": 1,
+  "n_donors": 315557,
+  "n_matched_pairs": 222,
+  "n_zero_matched_cases": 0,
   "n_full_matched_cases": 4,
   "lsps_fit_ok": true,
-  "caliper": 0.08348783484938321,
+  "caliper": 0.14612109118888292,
   "gates": {
     "G_minus1": "PASS",
     "G0": "PASS",
@@ -32,18 +32,18 @@
   "smd_summary": [
     {
       "feature": "AGE",
-      "smd_before": 0.22625998115825444,
-      "smd_after": 0.23412281820721867
+      "smd_before": 0.2238942863079284,
+      "smd_after": 0.22555448584008603
     },
     {
       "feature": "EN_LOS_num",
-      "smd_before": 0.5113079327337758,
-      "smd_after": 0.3792721907830569
+      "smd_before": 0.509095522459601,
+      "smd_after": 0.41557670868922836
     },
     {
       "feature": "n_chronic",
-      "smd_before": 1.0530444160235566,
-      "smd_after": 1.1338934190276817
+      "smd_before": 1.0439581151053858,
+      "smd_after": 1.125718225147576
     }
   ],
   "blanking_sweep": [

@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_07_CLABSI
 
-**Run:** 20260606_191317
+**Run:** 20260607_223648
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 147 |
+| Matched donor encounters | 178 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 147 |
+| Donors without diagnosis data | 178 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

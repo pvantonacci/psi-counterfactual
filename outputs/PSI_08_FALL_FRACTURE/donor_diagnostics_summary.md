@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_08_FALL_FRACTURE
 
-**Run:** 20260606_191431
+**Run:** 20260607_223820
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 73 |
+| Matched donor encounters | 85 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 73 |
+| Donors without diagnosis data | 85 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_17_BIRTH_TRAUMA
 
-**Run:** 20260606_192534
+**Run:** 20260607_225232
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 117 |
+| Matched donor encounters | 354 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 117 |
+| Donors without diagnosis data | 354 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

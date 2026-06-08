@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_10_POSTOP_AKI_DIALYSIS
 
-**Run:** 20260606_191718
+**Run:** 20260607_224154
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
@@ -9,9 +9,9 @@
 
 | Metric | Value |
 |---|---|
-| Matched donor encounters | 74 |
+| Matched donor encounters | 70 |
 | Donors with OMNY diagnosis data | 0 (0%) |
-| Donors without diagnosis data | 74 |
+| Donors without diagnosis data | 70 |
 | Total diagnosis rows | 0 |
 | Donors with a PSI-type ICD code | 0 (0% of those with dx) |
 

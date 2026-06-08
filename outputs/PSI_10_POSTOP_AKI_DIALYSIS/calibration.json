@@ -1,7 +1,7 @@
 {
   "note": "E-value stub \u2014 replace with formal sensitivity analysis in production",
   "data_mode": "csv",
-  "run_timestamp": "2026-06-06T19:18:23.081126+00:00",
+  "run_timestamp": "2026-06-07T22:42:59.168129+00:00",
   "e_value": 1.0,
   "rr_proxy": 1.0,
   "ate_raw": 0.0,

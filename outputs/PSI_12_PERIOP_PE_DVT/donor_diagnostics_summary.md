@@ -1,6 +1,6 @@
 # Counterfactual Donor Diagnostics — PSI_12_PERIOP_PE_DVT
 
-**Run:** 20260606_191944
+**Run:** 20260607_224437
 **Source:** OMNY DIAGNOSES table, via `dx_df_ft` (Stage 2a pull)
 **Scope:** K:1 matched donor encounters only (control arm)
 **Principal diagnosis:** `DX_PRIMARY = 'YES'` or `DX_LINE = 1`
